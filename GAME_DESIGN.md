@@ -72,16 +72,18 @@ Podle návrhu `inspirace/Draft.png`. Rozměry jsou orientační a doladí se př
 3. Kliknutím na platný cíl se akce provede a **tah hráče končí**.
 4. Kartu s počtem 0 nejde vybrat a nereaguje na kliknutí.
 
-**Dosah** (pro pistoli, kulomet a granát): pole je v dosahu, když vzdálenost jeho středu
-od středu pole bojovníka je nejvýše 4 délky pole, tedy `dx² + dy² ≤ 16`.
+**Dosah:** pole je v dosahu, když vzdálenost jeho středu od středu pole bojovníka
+je nejvýše R délek pole, tedy `dx² + dy² ≤ R²`.
+- Pistole: R = 5.
+- Kulomet a granát: R = 4.
 
 | Akce | Zvýraznění | Kliknutí | Spotřeba |
 |---|---|---|---|
 | **Pohyb** | prázdná pole z 8 okolních polí (jen uvnitř plochy) | bojovník se přesune na pole | neomezeně |
-| **Pistole** | pole v dosahu | jen na pole s trifidy: počet −1, při 0 pole zmizí | neomezeně |
-| **Kulomet** | pole v dosahu | jen na pole s trifidy: počet → 0, trifidi zmizí | −1 |
+| **Pistole** | pole v dosahu 5 | jen na pole s trifidy: počet −1, při 0 pole zmizí | neomezeně |
+| **Kulomet** | pole v dosahu 4 | jen na pole s trifidy: počet → 0, trifidi zmizí | −1 |
 | **Plamenomet** | až po najetí myší nad plochu (viz níže) | všechna zvýrazněná pole: počet → 0 | −1 |
-| **Granát** | až po najetí myší nad plochu (viz níže) | všech 9 polí oblasti 3×3: počet → 0 | −1 |
+| **Granát** | jemně dosah 4, oblast 3×3 až pod kurzorem (viz níže) | všech 9 polí oblasti 3×3: počet → 0 | −1 |
 
 **Plamenomet:**
 - Směr se určí podle úhlu od středu bojovníka ke kurzoru, zaokrouhleného na nejbližší
@@ -90,7 +92,8 @@ od středu pole bojovníka je nejvýše 4 délky pole, tedy `dx² + dy² ≤ 16`
 - Když je kurzor přímo nad bojovníkem, nic se nezvýrazní a kliknutí nic neudělá.
 
 **Granát:**
-- Zvýrazní se oblast 3×3 se středem na poli pod kurzorem.
+- Po výběru karty se jemně zvýrazní dosah (pole, kam lze granát hodit).
+- Pod kurzorem se výrazně zvýrazní oblast 3×3 se středem na poli pod kurzorem.
 - Střed musí být v dosahu, jinak se nic nezvýrazní a kliknutí nic neudělá.
 - Na kraji plochy se oblast ořízne.
 - Granát bojovníka nezraní.
@@ -106,12 +109,16 @@ Proběhne automaticky hned po tahu hráče (pokud hráč tahem nevyhrál):
 2. **Strop 9:** co přesáhne 9, se stane přebytkem a pole má 9.
 3. **Šíření:** přebytek se rozděluje po jednom trifidovi. Každý jde na náhodně vybrané
    sousední pole (z 8 okolních uvnitř plochy), které ještě nemá 9.
+   - Pole s přebytkem se zpracovávají po řádcích shora dolů, zleva doprava.
    - Pole, kam trifid dopadne, se v tomto tahu už znovu nezdvojnásobuje.
    - Šíření je jediný způsob, jak trifidi obsazují nová pole.
-4. **Plní sousedé:** když už žádný soused nemá místo, zbytek přebytku zanikne
-   a pole zůstane na 9.
-5. **Pole bojovníka:** je mezi sousedy, kam může trifid dopadnout. Dopad na bojovníka
-   znamená **prohru**.
+   - Když už žádný soused nemá místo, zbytek přebytku zanikne.
+4. **Pole bojovníka:** je mezi sousedy, kam může trifid dopadnout. Dopad na bojovníka
+   znamená **prohru** (tah okamžitě končí).
+5. **Přelidnění:** po šíření se každé pole s 9 trifidy, jehož všichni sousedé (uvnitř
+   plochy) mají také 9, vyprázdní na 0. Vyhodnocuje se pro všechna pole najednou,
+   takže souvislý blok plných polí zanikne celý. Tyto trifidy se nepočítají
+   do „Počtu zabitých“.
 
 Příklad: pole s 5 trifidy se zdvojnásobí na 10, zůstane na něm 9 a 1 trifid se rozšíří
 na náhodné sousední pole.
@@ -204,7 +211,7 @@ Kreslený styl, černé linky na papíře. Potřebné assety:
 ## 15. Otevřené otázky
 
 - Vyvážení: počty munice a rozmístění trifidů v jednotlivých levelech.
-- Pořadí, v jakém se při šíření zpracovávají pole s přebytkem (ověřit hraním).
+- Pořadí, v jakém se při šíření zpracovávají pole s přebytkem (teď po řádcích; ověřit hraním).
 - Náhoda: použít pevný seed pro každý level (stejná hra při opakování), nebo náhodný?
   Ukládat stav generátoru do uložené hry?
 - Animace tahů: rychlost a zda jde animace přeskočit kliknutím.

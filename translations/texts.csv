@@ -1,0 +1,20 @@
+keys,cs
+ACTION_MOVE,Pohyb
+ACTION_PISTOL,Pistole
+ACTION_MACHINE_GUN,Kulomet
+ACTION_FLAMETHROWER,Plamenomet
+ACTION_GRENADE,Granáty
+KILLS,Počet zabitých: %d
+TURN,Tah: %d
+LEVEL_TITLE,Level %d
+BTN_MENU,Menu
+BTN_ABOUT,O hře
+BTN_CONTINUE,Pokračovat
+BTN_NEXT_LEVEL,Další level
+BTN_RESTART,Hrát znovu
+BTN_QUIT,Ukončit hru
+MSG_MENU,Menu
+MSG_LEVEL_WON,Level dokončen! Všichni trifidi jsou zničeni.
+MSG_GAME_WON,Vyhrál jsi! Zničil jsi všechny trifidy.
+MSG_LOST,Prohra! Trifidi se dostali k bojovníkovi.
+MSG_LEVEL_ERROR,Level se nepodařilo načíst.

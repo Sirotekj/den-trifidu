@@ -11,6 +11,12 @@
 - Pracuj po malých krocích, které jdou spustit a ověřit.
 - **Git: commituj jen na výslovný pokyn.** Před commitem se zeptej.
 
+## Testy
+- Testy herní logiky: `godot --headless --path . --script res://tests/run_tests.gd`
+  (exit kód 0 = vše prošlo). Po nových souborech s `class_name` nejdřív
+  `godot --headless --path . --import`.
+- Při změně pravidel uprav nebo doplň testy v `tests/run_tests.gd`.
+
 ## Jazyk
 - Komunikace a dokumentace česky.
 - Kód anglicky: názvy souborů, tříd, funkcí, proměnných i komentáře.
