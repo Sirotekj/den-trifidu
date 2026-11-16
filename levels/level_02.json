@@ -6,5 +6,5 @@
     { "x": 0, "y": 0, "count": 1 },
     { "x": 0, "y": 8, "count": 1 }
   ],
-  "ammo": { "machine_gun": 8, "flamethrower": 4, "grenade": 2 }
+  "ammo": { "machine_gun": 2, "flamethrower": 1, "grenade": 1 }
 }

@@ -1,0 +1,7 @@
+{
+  "version": 1,
+  "name": "Level 8",
+  "player": { "x": 8, "y": 8 },
+  "trifids": [{ "x": 0, "y": 0, "count": 9 }],
+  "ammo": { "machine_gun": 12, "flamethrower": 6, "grenade": 3 }
+}
