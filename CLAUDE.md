@@ -2,7 +2,9 @@
 
 ## Projekt
 - 2D tahová hra v Godot 4.7 (GDScript), základní rozlišení 800×600, ovládání myší.
-- Jeden projekt, dvě hlavní scény: **DenTrifidu** (hra) a **EditorTrifidu** (editor levelů).
+- Jeden program se třemi obrazovkami: hlavní menu (`scenes/menu/`), hra (`scenes/game/`)
+  a editor levelů (`scenes/editor/`). Přepínání obrazovek a předávání dat mezi nimi
+  řeší autoload `App` (`scripts/app/app.gd`).
 - `GAME_DESIGN.md` je zdroj pravdy pro pravidla a data. Při změně pravidel ho aktualizuj
   dřív než kód. Když narazíš na rozpor nebo nejasnost, zeptej se.
 

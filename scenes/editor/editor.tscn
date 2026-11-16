@@ -1,0 +1,388 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/editor/editor.gd" id="1_editor"]
+[ext_resource type="Script" path="res://scripts/game/board_view.gd" id="2_board"]
+[ext_resource type="Theme" path="res://assets/graphics/ui/game_theme.tres" id="3_theme"]
+[ext_resource type="Texture2D" path="res://assets/graphics/background/paper.jpg" id="4_paper"]
+
+[sub_resource type="StyleBoxFlat" id="name_edit"]
+content_margin_left = 8.0
+content_margin_right = 8.0
+bg_color = Color(0.98, 0.97, 0.94, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.13, 0.11, 0.09, 1)
+
+[node name="Editor" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("3_theme")
+script = ExtResource("1_editor")
+
+[node name="Background" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("4_paper")
+expand_mode = 1
+
+[node name="MenuButton" type="Button" parent="."]
+layout_mode = 0
+offset_left = 26.0
+offset_top = 16.0
+offset_right = 156.0
+offset_bottom = 68.0
+focus_mode = 0
+theme_override_font_sizes/font_size = 22
+text = "BTN_MENU"
+
+[node name="Title" type="Label" parent="."]
+layout_mode = 0
+offset_left = 200.0
+offset_top = 8.0
+offset_right = 600.0
+offset_bottom = 72.0
+theme_override_font_sizes/font_size = 40
+text = "EDITOR_TITLE"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Board" type="Control" parent="."]
+layout_mode = 0
+offset_left = 34.0
+offset_top = 84.0
+offset_right = 520.0
+offset_bottom = 570.0
+script = ExtResource("2_board")
+
+[node name="Panel" type="VBoxContainer" parent="."]
+layout_mode = 0
+offset_left = 536.0
+offset_top = 80.0
+offset_right = 776.0
+offset_bottom = 580.0
+theme_override_constants/separation = 6
+
+[node name="Tools" type="HBoxContainer" parent="Panel"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="FighterTool" type="Button" parent="Panel/Tools"]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+size_flags_horizontal = 3
+focus_mode = 0
+theme_type_variation = &"CardButton"
+toggle_mode = true
+theme_override_font_sizes/font_size = 16
+text = "TOOL_FIGHTER"
+
+[node name="TrifidTool" type="Button" parent="Panel/Tools"]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+size_flags_horizontal = 3
+focus_mode = 0
+theme_type_variation = &"CardButton"
+toggle_mode = true
+theme_override_font_sizes/font_size = 16
+text = "TOOL_TRIFID"
+
+[node name="EraserTool" type="Button" parent="Panel/Tools"]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+size_flags_horizontal = 3
+focus_mode = 0
+theme_type_variation = &"CardButton"
+toggle_mode = true
+theme_override_font_sizes/font_size = 16
+text = "TOOL_ERASER"
+
+[node name="CountRow" type="HBoxContainer" parent="Panel"]
+custom_minimum_size = Vector2(0, 34)
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Label" type="Label" parent="Panel/CountRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 17
+text = "EDITOR_COUNT"
+vertical_alignment = 1
+
+[node name="Minus" type="Button" parent="Panel/CountRow"]
+custom_minimum_size = Vector2(38, 34)
+layout_mode = 2
+focus_mode = 0
+theme_type_variation = &"SmallButton"
+theme_override_font_sizes/font_size = 18
+text = "−"
+
+[node name="Value" type="Label" parent="Panel/CountRow"]
+custom_minimum_size = Vector2(34, 0)
+layout_mode = 2
+auto_translate_mode = 2
+theme_override_font_sizes/font_size = 20
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Plus" type="Button" parent="Panel/CountRow"]
+custom_minimum_size = Vector2(38, 34)
+layout_mode = 2
+focus_mode = 0
+theme_type_variation = &"SmallButton"
+theme_override_font_sizes/font_size = 18
+text = "+"
+
+[node name="Divider" type="ColorRect" parent="Panel"]
+custom_minimum_size = Vector2(0, 2)
+layout_mode = 2
+mouse_filter = 2
+color = Color(0.13, 0.11, 0.09, 0.85)
+
+[node name="MachineGunRow" type="HBoxContainer" parent="Panel"]
+custom_minimum_size = Vector2(0, 34)
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Label" type="Label" parent="Panel/MachineGunRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 17
+text = "ACTION_MACHINE_GUN"
+vertical_alignment = 1
+
+[node name="Minus" type="Button" parent="Panel/MachineGunRow"]
+custom_minimum_size = Vector2(38, 34)
+layout_mode = 2
+focus_mode = 0
+theme_type_variation = &"SmallButton"
+theme_override_font_sizes/font_size = 18
+text = "−"
+
+[node name="Value" type="Label" parent="Panel/MachineGunRow"]
+custom_minimum_size = Vector2(34, 0)
+layout_mode = 2
+auto_translate_mode = 2
+theme_override_font_sizes/font_size = 20
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Plus" type="Button" parent="Panel/MachineGunRow"]
+custom_minimum_size = Vector2(38, 34)
+layout_mode = 2
+focus_mode = 0
+theme_type_variation = &"SmallButton"
+theme_override_font_sizes/font_size = 18
+text = "+"
+
+[node name="FlamethrowerRow" type="HBoxContainer" parent="Panel"]
+custom_minimum_size = Vector2(0, 34)
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Label" type="Label" parent="Panel/FlamethrowerRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 17
+text = "ACTION_FLAMETHROWER"
+vertical_alignment = 1
+
+[node name="Minus" type="Button" parent="Panel/FlamethrowerRow"]
+custom_minimum_size = Vector2(38, 34)
+layout_mode = 2
+focus_mode = 0
+theme_type_variation = &"SmallButton"
+theme_override_font_sizes/font_size = 18
+text = "−"
+
+[node name="Value" type="Label" parent="Panel/FlamethrowerRow"]
+custom_minimum_size = Vector2(34, 0)
+layout_mode = 2
+auto_translate_mode = 2
+theme_override_font_sizes/font_size = 20
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Plus" type="Button" parent="Panel/FlamethrowerRow"]
+custom_minimum_size = Vector2(38, 34)
+layout_mode = 2
+focus_mode = 0
+theme_type_variation = &"SmallButton"
+theme_override_font_sizes/font_size = 18
+text = "+"
+
+[node name="GrenadeRow" type="HBoxContainer" parent="Panel"]
+custom_minimum_size = Vector2(0, 34)
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Label" type="Label" parent="Panel/GrenadeRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 17
+text = "ACTION_GRENADE"
+vertical_alignment = 1
+
+[node name="Minus" type="Button" parent="Panel/GrenadeRow"]
+custom_minimum_size = Vector2(38, 34)
+layout_mode = 2
+focus_mode = 0
+theme_type_variation = &"SmallButton"
+theme_override_font_sizes/font_size = 18
+text = "−"
+
+[node name="Value" type="Label" parent="Panel/GrenadeRow"]
+custom_minimum_size = Vector2(34, 0)
+layout_mode = 2
+auto_translate_mode = 2
+theme_override_font_sizes/font_size = 20
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Plus" type="Button" parent="Panel/GrenadeRow"]
+custom_minimum_size = Vector2(38, 34)
+layout_mode = 2
+focus_mode = 0
+theme_type_variation = &"SmallButton"
+theme_override_font_sizes/font_size = 18
+text = "+"
+
+[node name="NameEdit" type="LineEdit" parent="Panel"]
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.13, 0.11, 0.09, 1)
+theme_override_colors/font_placeholder_color = Color(0.13, 0.11, 0.09, 0.45)
+theme_override_colors/caret_color = Color(0.13, 0.11, 0.09, 1)
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("name_edit")
+theme_override_styles/focus = SubResource("name_edit")
+placeholder_text = "EDITOR_NAME_PLACEHOLDER"
+max_length = 40
+
+[node name="Buttons" type="GridContainer" parent="Panel"]
+layout_mode = 2
+theme_override_constants/h_separation = 6
+theme_override_constants/v_separation = 6
+columns = 2
+
+[node name="NewButton" type="Button" parent="Panel/Buttons"]
+custom_minimum_size = Vector2(0, 38)
+layout_mode = 2
+size_flags_horizontal = 3
+focus_mode = 0
+theme_type_variation = &"SmallButton"
+theme_override_font_sizes/font_size = 17
+text = "BTN_NEW"
+
+[node name="LoadButton" type="Button" parent="Panel/Buttons"]
+custom_minimum_size = Vector2(0, 38)
+layout_mode = 2
+size_flags_horizontal = 3
+focus_mode = 0
+theme_type_variation = &"SmallButton"
+theme_override_font_sizes/font_size = 17
+text = "BTN_LOAD"
+
+[node name="SaveButton" type="Button" parent="Panel/Buttons"]
+custom_minimum_size = Vector2(0, 38)
+layout_mode = 2
+size_flags_horizontal = 3
+focus_mode = 0
+theme_type_variation = &"SmallButton"
+theme_override_font_sizes/font_size = 17
+text = "BTN_SAVE"
+
+[node name="PlayButton" type="Button" parent="Panel/Buttons"]
+custom_minimum_size = Vector2(0, 38)
+layout_mode = 2
+size_flags_horizontal = 3
+focus_mode = 0
+theme_type_variation = &"SmallButton"
+theme_override_font_sizes/font_size = 17
+text = "BTN_PLAY"
+
+[node name="SaveCampaignButton" type="Button" parent="Panel"]
+custom_minimum_size = Vector2(0, 38)
+layout_mode = 2
+size_flags_horizontal = 3
+focus_mode = 0
+theme_type_variation = &"SmallButton"
+theme_override_font_sizes/font_size = 17
+text = "BTN_SAVE_CAMPAIGN"
+
+[node name="Status" type="Label" parent="Panel"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+auto_translate_mode = 2
+theme_override_font_sizes/font_size = 15
+autowrap_mode = 3
+
+[node name="Overlay" type="Control" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Dim" type="ColorRect" parent="Overlay"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.5)
+
+[node name="Dialog" type="PanelContainer" parent="Overlay"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -220.0
+offset_top = -220.0
+offset_right = 220.0
+offset_bottom = 220.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Box" type="VBoxContainer" parent="Overlay/Dialog"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Title" type="Label" parent="Overlay/Dialog/Box"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "EDITOR_LOAD_TITLE"
+horizontal_alignment = 1
+
+[node name="Scroll" type="ScrollContainer" parent="Overlay/Dialog/Box"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="LevelList" type="VBoxContainer" parent="Overlay/Dialog/Box/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="CancelButton" type="Button" parent="Overlay/Dialog/Box"]
+custom_minimum_size = Vector2(200, 46)
+layout_mode = 2
+size_flags_horizontal = 4
+focus_mode = 0
+theme_override_font_sizes/font_size = 20
+text = "BTN_CANCEL"

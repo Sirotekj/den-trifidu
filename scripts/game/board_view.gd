@@ -5,6 +5,8 @@ extends Control
 
 ## `cursor` is the mouse position in cell units (1.0 = one cell), needed by the flamethrower.
 signal cell_clicked(cell: Vector2i, cursor: Vector2)
+## Right mouse button (used by the editor as an eraser).
+signal cell_right_clicked(cell: Vector2i)
 
 const CELL_SIZE := 54.0
 
@@ -65,6 +67,10 @@ func _gui_input(event: InputEvent) -> void:
 		var cell := Vector2i(cursor.floor())
 		if interactive and GameState.in_bounds(cell):
 			cell_clicked.emit(cell, cursor)
+	elif event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_RIGHT:
+		var cell := Vector2i((event.position / CELL_SIZE).floor())
+		if interactive and GameState.in_bounds(cell):
+			cell_right_clicked.emit(cell)
 
 
 func _notification(what: int) -> void:

@@ -9,14 +9,15 @@ Tahová logická hra. Bojovník (hráč) stojí na ploše 9×9 a bojuje proti tr
 kteří se každý tah množí a šíří. Hráč a počítač se střídají: hráč provede jednu akci,
 počítač pak nechá trifidy vyrůst a vyhodnotí výhru nebo prohru.
 
-Jeden Godot projekt obsahuje dva programy:
+Jeden program **DenTrifidu** se třemi obrazovkami (kap. 8):
 
-| Program | Účel | Realizace |
-|---|---|---|
-| **DenTrifidu** | samotná hra | hlavní scéna hry, exportní preset „DenTrifidu“ |
-| **EditorTrifidu** | tvorba levelů (jen pro vývoj) | samostatná hlavní scéna, exportní preset „EditorTrifidu“ |
+| Obrazovka | Účel |
+|---|---|
+| **Hlavní menu** | start programu, výběr Nová hra / Pokračovat / O hře / Editor / Vypnout |
+| **Hra** | hraní levelů kampaně, uložené hry nebo vlastních levelů |
+| **Editor** | tvorba levelů; přístupný i hráčům (vlastní levely), autorovi i pro kampaň |
 
-Oba programy sdílejí stejnou herní logiku a stejný formát levelů.
+Hra i editor sdílejí stejnou herní logiku a stejný formát levelů.
 
 ## 2. Technické parametry
 
@@ -26,7 +27,7 @@ Oba programy sdílejí stejnou herní logiku a stejný formát levelů.
 - **Základní rozlišení:** 800×600.
 - **Okno:** fullscreen. Obraz se škáluje se zachováním poměru stran
   (stretch mode `canvas_items`, aspect `keep`), zbytek obrazovky je černý.
-- **Ovládání:** pouze myš.
+- **Ovládání:** myš; klávesnice jen pro název levelu v editoru.
 - **Jazyk hry:** čeština, s přípravou na angličtinu (viz kap. 14).
 
 ## 3. Rozvržení obrazovky
@@ -146,24 +147,40 @@ na náhodné sousední pole.
 
 ## 8. Průběh hry a obrazovky
 
-- **Hlavní menu:** Nová hra, Pokračovat (jen když existuje uložená hra), Konec.
+Hra má tři obrazovky. Mezi všemi se přepíná krátkým ztmavením do černé a rozsvícením
+(asi 0,35 s); po spuštění programu se hlavní menu rozsvítí z černé.
+
+- **Hlavní menu:**
+  - nahoře nadpis „Den trifidů“, uprostřed pod sebou tlačítka
+    **Nová hra | Pokračovat | O hře | Editor | Vypnout**,
+  - vlevo od nabídky obrázek trifidů (`inspirace/Trifid.png`), vpravo bojovník
+    (`inspirace/Man.png`),
+  - Nová hra spustí Level 1, Pokračovat načte uloženou hru (bez ní je zašedlé),
+    Editor otevře editor levelů, Vypnout ukončí program,
+  - O hře je zatím zašedlé (pravidla a ovládání se doplní později).
 - **Hra:** obrazovka podle kap. 3.
-- **Menu ve hře:** pokračovat, uložit, návrat do hlavního menu.
-- **O hře:** pravidla a ovládání.
-- **Výhra levelu, výhra hry, prohra:** krátká obrazovka s nabídkou dalšího kroku.
+  - **Menu ve hře:** Pokračovat, Uložit, Hrát znovu, Ukončit hru.
+  - Ukončit hru vrátí hráče do hlavního menu (u levelu spuštěného z editoru zpět do editoru).
+- **Výhra levelu, výhra hry, prohra:** dialog s nabídkou dalšího kroku
+  (Další level / Hrát znovu / Ukončit hru).
+- **Editor:** viz kap. 11.
 
 ## 9. Ukládání
 
 - Jedna ukládací pozice: `user://save.json`.
-- Ukládá se: aktuální level, pozice a počty všech trifidů, pozice bojovníka,
-  zbývající použití kulometu, plamenometu a granátů, počet zabitých a číslo tahu.
-- Uloženou hru načte volba „Pokračovat“ v hlavním menu.
+- Hráč ukládá ručně volbou **Uložit** v menu ve hře; uložení přepíše předchozí.
+- Ukládá se: odkud level je (číslo levelu kampaně nebo soubor vlastního levelu),
+  pozice a počty všech trifidů, pozice bojovníka, zbývající použití kulometu,
+  plamenometu a granátů, počet zabitých a číslo tahu.
+- Uloženou hru načte volba **Pokračovat** v hlavním menu.
 
 ## 10. Formát levelu (JSON)
 
-- Levely leží ve složce `levels/`, soubory `level_01.json`, `level_02.json` atd.
-  Pořadí levelů určuje číslo v názvu.
-- Zpočátku existuje jen Level 1, další se tvoří v editoru.
+- **Kampaň:** složka `levels/`, soubory `level_01.json`, `level_02.json` atd.
+  Pořadí levelů určuje číslo v názvu. Je součástí hry a hráč ji nemění.
+- **Vlastní levely** hráče z editoru: `user://levels/<název>.json` (uživatelská složka
+  Godotu). Název souboru vznikne z názvu levelu (bez diakritiky, malá písmena,
+  podtržítka), při shodě se přidá číslo.
 
 ```json
 {
@@ -181,18 +198,31 @@ na náhodné sousední pole.
 ```
 
 **Validace:** souřadnice 0–8, `count` 1–9, každé pole nejvýše jednou, bojovník není
-na poli s trifidy, munice ≥ 0.
+na poli s trifidy, munice ≥ 0. Editor navíc nedovolí uložit level bez trifidů.
 
-## 11. EditorTrifidu
+## 11. Editor levelů
 
-Nástroj jen pro vývoj, nedistribuuje se hráčům.
+Součást hry, otevírá se z hlavního menu. Slouží hráči k tvorbě vlastních levelů
+a autorovi hry k tvorbě kampaně.
 
-- Stejná plocha 9×9 jako ve hře.
-- Nástroje: umístit bojovníka, umístit trifidy (výběr počtu 1–9), smazat pole.
-- Nastavení počtu kulometu, plamenometu a granátů.
-- Název levelu, uložit a načíst JSON.
-- Tlačítko „Vyzkoušet“ spustí upravený level ve hře.
-- Kontrola před uložením: přesně jeden bojovník a platná data podle kap. 10.
+- Vlevo stejná plocha 9×9 jako ve hře, vpravo panel.
+- **Nástroje:**
+  - **Bojovník:** klik přesune bojovníka na pole (trifidi na tom poli zmizí).
+    Na ploše je vždy právě jeden bojovník.
+  - **Trifid:** klik nastaví na poli zvolený počet 1–9 (volba − / +); na bojovníka nejde.
+  - **Guma:** klik pole vyprázdní. Pravé tlačítko myši maže s jakýmkoli nástrojem.
+- **Munice:** počty kulometu, plamenometu a granátů (− / +, 0–99).
+- **Název levelu:** píše se z klávesnice (jediné místo ve hře s klávesnicí).
+- **Tlačítka:**
+  - **Nový:** prázdná plocha, bojovník uprostřed.
+  - **Načíst:** seznam levelů kampaně a vlastních levelů.
+  - **Uložit:** uloží jako vlastní level (`user://levels/`). Načtený vlastní level přepíše.
+  - **Uložit do kampaně:** jen při spuštění z Godotu (vývoj). Načtený level kampaně
+    přepíše, jinak uloží jako další číslo v `levels/`.
+  - **Hrát:** spustí právě upravovaný stav ve hře (i neuložený); Ukončit hru vrátí
+    do editoru se stejným stavem.
+  - **Menu:** návrat do hlavního menu.
+- Kontrola před uložením a hraním: aspoň jeden trifid a platná data podle kap. 10.
 
 ## 12. Grafika
 

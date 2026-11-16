@@ -18,6 +18,9 @@ func _init() -> void:
 	_test_win()
 	_test_level_loading()
 	_test_serialization()
+	_test_save_game()
+	_test_custom_levels()
+	_test_editor_rules()
 	print("%d checks, %d failed" % [_checks, _failures])
 	quit(1 if _failures > 0 else 0)
 
@@ -245,3 +248,90 @@ func _test_serialization() -> void:
 	_check(copy.get_count(Vector2i(7, 1)) == 6, "serialization: trifids")
 	_check(copy.kills == 5 and copy.turn == 4, "serialization: counters")
 	_check(copy.get_ammo(GameState.AMMO_GRENADE) == 2, "serialization: ammo")
+
+
+const TEST_SAVE := "user://test_save.json"
+const TEST_LEVELS := "user://test_levels"
+
+
+func _test_save_game() -> void:
+	_remove(TEST_SAVE)
+	_check(not SaveGame.exists(TEST_SAVE), "save: nothing saved yet")
+	_check(SaveGame.load_game(TEST_SAVE).is_empty(), "save: loading nothing gives {}")
+	var start := _state(Vector2i(4, 4))
+	start.set_count(Vector2i(1, 1), 2)
+	var state := start.duplicate_state()
+	state.set_count(Vector2i(1, 1), 4)
+	state.player = Vector2i(5, 5)
+	state.kills = 3
+	state.turn = 6
+	state.ammo[GameState.AMMO_GRENADE] = 1
+	var source := {"type": "campaign", "level": 2}
+	_check(SaveGame.save(state, start, source, TEST_SAVE) == OK, "save: written")
+	_check(SaveGame.exists(TEST_SAVE), "save: file exists")
+	var saved := SaveGame.load_game(TEST_SAVE)
+	_check(not saved.is_empty(), "save: loads back")
+	if not saved.is_empty():
+		var loaded: GameState = saved["state"]
+		var loaded_start: GameState = saved["start"]
+		_check(loaded.player == Vector2i(5, 5) and loaded.get_count(Vector2i(1, 1)) == 4, "save: board restored")
+		_check(loaded.kills == 3 and loaded.turn == 6, "save: counters restored")
+		_check(loaded.get_ammo(GameState.AMMO_GRENADE) == 1, "save: ammo restored")
+		_check(loaded_start.get_count(Vector2i(1, 1)) == 2 and loaded_start.player == Vector2i(4, 4), "save: start of level restored")
+		_check(saved["source"].get("type") == "campaign" and int(saved["source"].get("level")) == 2, "save: source restored")
+	_remove(TEST_SAVE)
+
+
+func _test_custom_levels() -> void:
+	_check(LevelLoader.slugify("Můj první Level!") == "muj_prvni_level", "slug: diacritics and spaces")
+	_check(LevelLoader.slugify("  ") == "level", "slug: empty name")
+	_clear_dir(TEST_LEVELS)
+	var state := _state(Vector2i(4, 4))
+	state.set_count(Vector2i(0, 0), 3)
+	state.level_name = "Žlutý kůň"
+	var first := LevelLoader.save_custom(state.to_level_dict(), "", TEST_LEVELS)
+	var second := LevelLoader.save_custom(state.to_level_dict(), "", TEST_LEVELS)
+	_check(first.get_file() == "zluty_kun.json", "custom: file named after the level")
+	_check(second.get_file() == "zluty_kun_2.json", "custom: unique file name")
+	state.set_count(Vector2i(0, 0), 5)
+	_check(LevelLoader.save_custom(state.to_level_dict(), first, TEST_LEVELS) == first, "custom: overwrite keeps the file")
+	_check(LevelLoader.list_custom(TEST_LEVELS).size() == 2, "custom: listed")
+	var loaded := LevelLoader.load_from_path(first)
+	_check(loaded != null and loaded.get_count(Vector2i(0, 0)) == 5, "custom: loads the overwritten level")
+	_check(loaded != null and loaded.level_name == "Žlutý kůň", "custom: name kept")
+	_check(not state.to_level_dict().has("kills"), "custom: level data has no game progress")
+	_check(LevelLoader.next_campaign_number() == LevelLoader.campaign_numbers().back() + 1, "campaign: next number")
+	_clear_dir(TEST_LEVELS)
+
+
+func _test_editor_rules() -> void:
+	var state := EditorRules.new_level()
+	_check(state.player == Vector2i(4, 4) and state.total_trifids() == 0, "editor: new level")
+	_check(EditorRules.check(state, false) == EditorRules.ERROR_NO_TRIFIDS, "editor: needs a trifid")
+	_check(EditorRules.place_trifids(state, Vector2i(2, 2), 12), "editor: place trifids")
+	_check(state.get_count(Vector2i(2, 2)) == 9, "editor: count capped at 9")
+	_check(not EditorRules.place_trifids(state, Vector2i(4, 4), 3), "editor: not on the fighter")
+	_check(EditorRules.check(state, true) == EditorRules.ERROR_NO_NAME, "editor: saving needs a name")
+	state.level_name = "Test"
+	_check(EditorRules.check(state, true) == "", "editor: valid level")
+	EditorRules.place_player(state, Vector2i(2, 2))
+	_check(state.player == Vector2i(2, 2) and state.get_count(Vector2i(2, 2)) == 0, "editor: fighter replaces trifids")
+	EditorRules.place_trifids(state, Vector2i(3, 3), 2)
+	EditorRules.erase(state, Vector2i(3, 3))
+	_check(state.get_count(Vector2i(3, 3)) == 0, "editor: eraser")
+	EditorRules.set_ammo(state, GameState.AMMO_GRENADE, 150)
+	_check(state.get_ammo(GameState.AMMO_GRENADE) == EditorRules.MAX_AMMO, "editor: ammo capped")
+	EditorRules.set_ammo(state, GameState.AMMO_GRENADE, -3)
+	_check(state.get_ammo(GameState.AMMO_GRENADE) == 0, "editor: ammo not negative")
+
+
+func _remove(path: String) -> void:
+	if FileAccess.file_exists(path):
+		DirAccess.remove_absolute(path)
+
+
+func _clear_dir(dir: String) -> void:
+	if not DirAccess.dir_exists_absolute(dir):
+		return
+	for file in DirAccess.get_files_at(dir):
+		DirAccess.remove_absolute(dir.path_join(file))

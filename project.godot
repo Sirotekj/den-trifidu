@@ -11,9 +11,13 @@ config_version=5
 [application]
 
 config/name="Den trifidů"
-run/main_scene="res://scenes/game/game.tscn"
+run/main_scene="res://scenes/menu/main_menu.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 config/icon="res://icon.svg"
+
+[autoload]
+
+App="*res://scripts/app/app.gd"
 
 [display]
 

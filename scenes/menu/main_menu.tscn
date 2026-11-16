@@ -1,0 +1,105 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/menu/main_menu.gd" id="1_menu"]
+[ext_resource type="Theme" path="res://assets/graphics/ui/game_theme.tres" id="2_theme"]
+[ext_resource type="Texture2D" path="res://assets/graphics/background/paper.jpg" id="3_paper"]
+[ext_resource type="Texture2D" path="res://assets/graphics/menu/menu_trifids.png" id="4_trifids"]
+[ext_resource type="Texture2D" path="res://assets/graphics/menu/menu_fighter.png" id="5_fighter"]
+
+[node name="MainMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("2_theme")
+script = ExtResource("1_menu")
+
+[node name="Background" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("3_paper")
+expand_mode = 1
+
+[node name="Title" type="Label" parent="."]
+layout_mode = 0
+offset_left = 100.0
+offset_top = 34.0
+offset_right = 700.0
+offset_bottom = 124.0
+theme_override_font_sizes/font_size = 60
+text = "GAME_TITLE"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Trifids" type="TextureRect" parent="."]
+layout_mode = 0
+offset_left = 30.0
+offset_top = 165.0
+offset_right = 280.0
+offset_bottom = 540.0
+mouse_filter = 2
+texture = ExtResource("4_trifids")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Fighter" type="TextureRect" parent="."]
+layout_mode = 0
+offset_left = 520.0
+offset_top = 165.0
+offset_right = 770.0
+offset_bottom = 540.0
+mouse_filter = 2
+texture = ExtResource("5_fighter")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Buttons" type="VBoxContainer" parent="."]
+layout_mode = 0
+offset_left = 290.0
+offset_top = 175.0
+offset_right = 510.0
+offset_bottom = 530.0
+theme_override_constants/separation = 16
+alignment = 1
+
+[node name="NewGameButton" type="Button" parent="Buttons"]
+custom_minimum_size = Vector2(220, 56)
+layout_mode = 2
+focus_mode = 0
+theme_override_font_sizes/font_size = 24
+text = "BTN_NEW_GAME"
+
+[node name="ContinueButton" type="Button" parent="Buttons"]
+custom_minimum_size = Vector2(220, 56)
+layout_mode = 2
+focus_mode = 0
+theme_override_font_sizes/font_size = 24
+text = "BTN_CONTINUE"
+
+[node name="AboutButton" type="Button" parent="Buttons"]
+custom_minimum_size = Vector2(220, 56)
+layout_mode = 2
+focus_mode = 0
+theme_override_font_sizes/font_size = 24
+text = "BTN_ABOUT"
+
+[node name="EditorButton" type="Button" parent="Buttons"]
+custom_minimum_size = Vector2(220, 56)
+layout_mode = 2
+focus_mode = 0
+theme_override_font_sizes/font_size = 24
+text = "BTN_EDITOR"
+
+[node name="ExitButton" type="Button" parent="Buttons"]
+custom_minimum_size = Vector2(220, 56)
+layout_mode = 2
+focus_mode = 0
+theme_override_font_sizes/font_size = 24
+text = "BTN_EXIT"

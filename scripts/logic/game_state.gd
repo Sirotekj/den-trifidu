@@ -77,6 +77,19 @@ static func from_dict(data: Dictionary) -> GameState:
 	return state
 
 
+## Independent copy of the state.
+func duplicate_state() -> GameState:
+	return GameState.from_dict(to_dict())
+
+
+## Level data only (no game progress), as stored in level files.
+func to_level_dict() -> Dictionary:
+	var data := to_dict()
+	data.erase("kills")
+	data.erase("turn")
+	return data
+
+
 ## Serializes the state; the format is a superset of the level format,
 ## so it can be used both for levels and for saved games.
 func to_dict() -> Dictionary:

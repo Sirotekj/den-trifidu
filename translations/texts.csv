@@ -18,3 +18,33 @@ MSG_LEVEL_WON,Level dokončen! Všichni trifidi jsou zničeni.
 MSG_GAME_WON,Vyhrál jsi! Zničil jsi všechny trifidy.
 MSG_LOST,Prohra! Trifidi se dostali k bojovníkovi.
 MSG_LEVEL_ERROR,Level se nepodařilo načíst.
+GAME_TITLE,Den trifidů
+BTN_NEW_GAME,Nová hra
+BTN_EDITOR,Editor
+BTN_EXIT,Vypnout
+BTN_SAVE,Uložit
+BTN_NEW,Nový
+BTN_LOAD,Načíst
+BTN_PLAY,Hrát
+BTN_SAVE_CAMPAIGN,Uložit do kampaně
+BTN_CANCEL,Zrušit
+MSG_SAVED,Hra uložena.
+MSG_SAVE_FAILED,Hru se nepodařilo uložit.
+EDITOR_TITLE,Editor levelů
+EDITOR_UNTITLED,Bez názvu
+TOOL_FIGHTER,Bojovník
+TOOL_TRIFID,Trifid
+TOOL_ERASER,Guma
+EDITOR_COUNT,Počet trifidů
+EDITOR_NAME_PLACEHOLDER,Název levelu
+EDITOR_LOAD_TITLE,Načíst level
+EDITOR_CAMPAIGN_ITEM,Kampaň %d: %s
+EDITOR_CUSTOM_ITEM,Vlastní: %s
+EDITOR_NO_LEVELS,Žádné levely.
+EDITOR_ERR_NO_TRIFIDS,Level musí mít aspoň jednoho trifida.
+EDITOR_ERR_NO_NAME,Nejdřív napiš název levelu.
+EDITOR_ERR_INVALID,Level není platný.
+EDITOR_ERR_WRITE,Level se nepodařilo uložit.
+EDITOR_SAVED,Uloženo: %s
+EDITOR_SAVED_CAMPAIGN,Uloženo do kampaně jako level %d.
+EDITOR_LOADED,Načteno: %s
