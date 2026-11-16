@@ -24,6 +24,8 @@ const TARGET_OUTLINE_COLOR := Color(0.85, 0.4, 0.05, 0.95)
 const HOVER_COLOR := Color(0.9, 0.25, 0.08, 0.4)
 const HOVER_OUTLINE_COLOR := Color(0.75, 0.12, 0.03, 1.0)
 const CAUGHT_COLOR := Color(0.8, 0.1, 0.05)
+const AIM_GUIDE_COLOR := Color(0.6, 0.08, 0.02, 0.8)
+const AIM_GUIDE_WIDTH := 1.5
 ## Number label in the bottom-right corner of a trifid cell (fraction of the cell).
 const LABEL_SIZE := Vector2(0.38, 0.45)
 const LABEL_FONT_SIZE := 15
@@ -88,6 +90,29 @@ func _draw() -> void:
 	for outline: Array in outlines:
 		for cell: Vector2i in outline[0]:
 			draw_rect(_cell_rect(cell).grow(-2.0), outline[1], false, outline[2])
+	_draw_aim_guide()
+
+
+## Thin guide showing where the machine gun or the flamethrower is aimed.
+func _draw_aim_guide() -> void:
+	if not _hovering or not interactive or not Rules.can_use(state, action):
+		return
+	var aim := Rules.aim_vector(state, _cursor)
+	if aim == Vector2.ZERO:
+		return
+	var center := Rules.fighter_center(state) * CELL_SIZE
+	match action:
+		Rules.Action.MACHINE_GUN:
+			var step := aim / maxf(absf(aim.x), absf(aim.y))
+			var end := center + step * Rules.MACHINE_GUN_LENGTH * CELL_SIZE
+			draw_line(center, end, AIM_GUIDE_COLOR, AIM_GUIDE_WIDTH, true)
+		Rules.Action.FLAMETHROWER:
+			var radius := Rules.FLAME_RADIUS * CELL_SIZE
+			var half := deg_to_rad(Rules.FLAME_ANGLE / 2.0)
+			var axis := aim.angle()
+			draw_line(center, center + Vector2.from_angle(axis - half) * radius, AIM_GUIDE_COLOR, AIM_GUIDE_WIDTH, true)
+			draw_line(center, center + Vector2.from_angle(axis + half) * radius, AIM_GUIDE_COLOR, AIM_GUIDE_WIDTH, true)
+			draw_arc(center, radius, axis - half, axis + half, 16, AIM_GUIDE_COLOR, AIM_GUIDE_WIDTH, true)
 
 
 ## Fills the highlighted cells and returns the outlines to draw over the sprites
@@ -102,14 +127,14 @@ func _draw_highlights() -> Array:
 			var targets := Rules.move_targets(state)
 			_fill_cells(targets, TARGET_COLOR)
 			outlines.append([targets, TARGET_OUTLINE_COLOR, 2.0])
-		Rules.Action.PISTOL, Rules.Action.MACHINE_GUN:
+		Rules.Action.PISTOL:
 			_fill_cells(Rules.range_cells(state, Rules.weapon_range(action)), RANGE_COLOR)
-			var targets := Rules.shoot_targets(state, action)
+			var targets := Rules.pistol_targets(state)
 			_fill_cells(targets, TARGET_COLOR)
 			outlines.append([targets, TARGET_OUTLINE_COLOR, 2.0])
 		Rules.Action.GRENADE:
 			_fill_cells(Rules.range_cells(state, Rules.weapon_range(action)), GRENADE_RANGE_COLOR)
-	# Flamethrower and grenade show their blast area under the cursor.
+	# Machine gun, flamethrower and grenade show their hit area under the cursor.
 	if _hovering:
 		var area := Rules.target_cells(state, action, hover_cell, _cursor)
 		_fill_cells(area, HOVER_COLOR)

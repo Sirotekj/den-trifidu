@@ -72,23 +72,36 @@ Podle návrhu `inspirace/Draft.png`. Rozměry jsou orientační a doladí se př
 3. Kliknutím na platný cíl se akce provede a **tah hráče končí**.
 4. Kartu s počtem 0 nejde vybrat a nereaguje na kliknutí.
 
-**Dosah:** pole je v dosahu, když vzdálenost jeho středu od středu pole bojovníka
-je nejvýše R délek pole, tedy `dx² + dy² ≤ R²`.
+**Dosah** (pistole a granát): pole je v dosahu, když vzdálenost jeho středu od středu
+pole bojovníka je nejvýše R délek pole, tedy `dx² + dy² ≤ R²`.
 - Pistole: R = 5.
-- Kulomet a granát: R = 4.
+- Granát: R = 4.
 
 | Akce | Zvýraznění | Kliknutí | Spotřeba |
 |---|---|---|---|
 | **Pohyb** | prázdná pole z 8 okolních polí (jen uvnitř plochy) | bojovník se přesune na pole | neomezeně |
-| **Pistole** | pole v dosahu 5 | jen na pole s trifidy: počet −1, při 0 pole zmizí | neomezeně |
-| **Kulomet** | pole v dosahu 4 | jen na pole s trifidy: počet → 0, trifidi zmizí | −1 |
-| **Plamenomet** | až po najetí myší nad plochu (viz níže) | všechna zvýrazněná pole: počet → 0 | −1 |
+| **Pistole** | pole v dosahu 5 | jen na pole s trifidy: počet → 0, trifidi zmizí | neomezeně |
+| **Kulomet** | až po najetí myší nad plochu: linie 4 polí (viz níže) | všechna zvýrazněná pole: počet → 0 | −1 |
+| **Plamenomet** | až po najetí myší nad plochu: výseč 30° (viz níže) | všechna zvýrazněná pole: počet → 0 | −1 |
 | **Granát** | jemně dosah 4, oblast 3×3 až pod kurzorem (viz níže) | všech 9 polí oblasti 3×3: počet → 0 | −1 |
 
+**Kulomet:**
+- Míří libovolným směrem: paprsek vede ze středu bojovníka přes kurzor.
+- Paprsek se krokuje po hlavní ose (vodorovné nebo svislé, podle toho, ve které je
+  delší) po jednom poli, celkem 4 kroky. V každém kroku je zasažené pole, ve kterém
+  paprsek leží.
+- Vodorovně, svisle i přesně šikmo tak zasáhne 4 pole v řadě, mezi těmito směry
+  linie plynule „uhýbá“. Příklad: bojovník na (4,4) míří směrem (3,1) → zasáhne
+  (5,4), (6,5), (7,5), (8,5).
+- Na kraji plochy se linie zkrátí.
+- Když je kurzor přímo nad bojovníkem, nic se nezvýrazní a kliknutí nic neudělá.
+
 **Plamenomet:**
-- Směr se určí podle úhlu od středu bojovníka ke kurzoru, zaokrouhleného na nejbližší
-  z 8 směrů (vodorovně, svisle, šikmo).
-- Zvýrazní se 4 pole v tomto směru od bojovníka. Na kraji plochy se plamen zkrátí.
+- Zasahuje kruhovou výseč s úhlem 30° a poloměrem 4 pole, měřeno od středu bojovníka.
+- Osa výseče míří od středu bojovníka ke kurzoru (výseč sahá 15° na každou stranu).
+- Zasažené je každé pole, do kterého výseč zasahuje aspoň malou částí (pouhý dotyk
+  hranou nestačí). Technicky: pole se testuje mřížkou 6×6 bodů a stačí jeden bod ve výseči.
+- Pole bojovníka se nepočítá. Na kraji plochy se výseč ořízne.
 - Když je kurzor přímo nad bojovníkem, nic se nezvýrazní a kliknutí nic neudělá.
 
 **Granát:**

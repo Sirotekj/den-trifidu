@@ -12,7 +12,6 @@ func _init() -> void:
 	_test_move()
 	_test_pistol()
 	_test_machine_gun()
-	_test_flame_direction()
 	_test_flamethrower()
 	_test_grenade()
 	_test_trifid_turn()
@@ -56,7 +55,6 @@ func _test_range() -> void:
 	_check(Rules.range_cells(state).size() == 48, "range: 48 cells from the center")
 	_check(Rules.range_cells(_state(Vector2i(0, 0))).size() == 16, "range: 16 cells from a corner")
 	_check(Rules.weapon_range(Rules.Action.PISTOL) == 5, "range: pistol reaches 5")
-	_check(Rules.weapon_range(Rules.Action.MACHINE_GUN) == 4, "range: machine gun reaches 4")
 	_check(Rules.weapon_range(Rules.Action.GRENADE) == 4, "range: grenade reaches 4")
 	_check(Rules.in_range(state, Vector2i(8, 7), 5), "range 5: (4,3) offset is in range")
 	_check(Rules.range_cells(state, 5).size() == 76, "range 5: 76 cells from the center")
@@ -73,71 +71,81 @@ func _test_move() -> void:
 	_check(state.player == Vector2i(3, 3), "move: player moved")
 
 
+func _cursor_at(cell: Vector2i) -> Vector2:
+	return Vector2(cell) + Vector2(0.5, 0.5)
+
+
 func _test_pistol() -> void:
 	var state := _state(Vector2i(4, 4))
-	state.set_count(Vector2i(4, 6), 2)
+	state.set_count(Vector2i(4, 6), 7)
 	state.set_count(Vector2i(8, 8), 1)
-	_check(Rules.perform(state, Rules.Action.PISTOL, Vector2i(4, 6)) == 1, "pistol: kills one")
-	_check(state.get_count(Vector2i(4, 6)) == 1, "pistol: count decreased")
-	Rules.perform(state, Rules.Action.PISTOL, Vector2i(4, 6))
-	_check(state.get_count(Vector2i(4, 6)) == 0, "pistol: trifid disappears at 0")
-	_check(state.kills == 2, "pistol: kills counted")
+	_check(Rules.perform(state, Rules.Action.PISTOL, Vector2i(4, 6)) == 7, "pistol: kills all on the cell")
+	_check(state.get_count(Vector2i(4, 6)) == 0, "pistol: cell cleared")
+	_check(state.kills == 7, "pistol: kills counted")
+	_check(state.get_ammo(GameState.AMMO_MACHINE_GUN) == 2, "pistol: uses no ammo")
 	_check(Rules.perform(state, Rules.Action.PISTOL, Vector2i(4, 6)) == Rules.INVALID, "pistol: empty cell is invalid")
 	_check(Rules.perform(state, Rules.Action.PISTOL, Vector2i(8, 8)) == Rules.INVALID, "pistol: out of range is invalid")
-	state.set_count(Vector2i(8, 7), 1)
-	_check(Rules.perform(state, Rules.Action.PISTOL, Vector2i(8, 7)) == 1, "pistol: hits at distance 5")
-	state.set_count(Vector2i(8, 7), 1)
-	_check(Rules.perform(state, Rules.Action.MACHINE_GUN, Vector2i(8, 7)) == Rules.INVALID, "machine gun: distance 5 is out of range")
+	state.set_count(Vector2i(8, 7), 3)
+	_check(Rules.perform(state, Rules.Action.PISTOL, Vector2i(8, 7)) == 3, "pistol: hits at distance 5")
 
 
 func _test_machine_gun() -> void:
 	var state := _state(Vector2i(4, 4))
-	state.set_count(Vector2i(5, 5), 7)
-	state.set_count(Vector2i(3, 3), 4)
-	state.set_count(Vector2i(2, 2), 4)
-	_check(Rules.perform(state, Rules.Action.MACHINE_GUN, Vector2i(5, 5)) == 7, "machine gun: kills all on cell")
-	_check(state.get_count(Vector2i(5, 5)) == 0, "machine gun: cell cleared")
+	for direction: Vector2i in Rules.NEIGHBOR_OFFSETS:
+		var expected: Array[Vector2i] = []
+		for step in range(1, 5):
+			expected.append(state.player + direction * step)
+		var cells := Rules.machine_gun_cells(state, _cursor_at(state.player + direction * 3))
+		_check(cells == expected, "machine gun: 4 cells toward %s" % direction)
+	var bent: Array[Vector2i] = [Vector2i(5, 4), Vector2i(6, 5), Vector2i(7, 5), Vector2i(8, 5)]
+	_check(Rules.machine_gun_cells(state, Vector2(7.5, 5.5)) == bent, "machine gun: free direction (3,1)")
+	_check(Rules.machine_gun_cells(_state(Vector2i(7, 4)), Vector2(8.5, 4.5)).size() == 1, "machine gun: clipped at edge")
+	_check(Rules.machine_gun_cells(state, Vector2(4.7, 4.2)).is_empty(), "machine gun: no aim on own cell")
+
+	state.set_count(Vector2i(5, 4), 3)
+	state.set_count(Vector2i(8, 4), 9)
+	state.set_count(Vector2i(5, 5), 2)
+	_check(Rules.perform(state, Rules.Action.MACHINE_GUN, Vector2i(8, 4), Vector2(8.5, 4.5)) == 12, "machine gun: kills everything in line")
+	_check(state.get_count(Vector2i(5, 5)) == 2, "machine gun: other cells untouched")
 	_check(state.get_ammo(GameState.AMMO_MACHINE_GUN) == 1, "machine gun: ammo decreased")
-	Rules.perform(state, Rules.Action.MACHINE_GUN, Vector2i(3, 3))
+	_check(Rules.perform(state, Rules.Action.MACHINE_GUN, Vector2i(4, 4), Vector2(4.5, 4.5)) == Rules.INVALID, "machine gun: own cell is invalid")
+	_check(state.get_ammo(GameState.AMMO_MACHINE_GUN) == 1, "machine gun: invalid use keeps ammo")
+	Rules.perform(state, Rules.Action.MACHINE_GUN, Vector2i(0, 4), Vector2(0.5, 4.5))
 	_check(not Rules.can_use(state, Rules.Action.MACHINE_GUN), "machine gun: unusable at 0 ammo")
-	_check(Rules.perform(state, Rules.Action.MACHINE_GUN, Vector2i(2, 2)) == Rules.INVALID, "machine gun: no ammo is invalid")
-	_check(state.get_count(Vector2i(2, 2)) == 4, "machine gun: no ammo leaves trifids")
-
-
-func _test_flame_direction() -> void:
-	var origin := Vector2i(4, 4)
-	var expected := {
-		Vector2i(8, 4): Vector2i(1, 0),
-		Vector2i(0, 4): Vector2i(-1, 0),
-		Vector2i(4, 0): Vector2i(0, -1),
-		Vector2i(4, 8): Vector2i(0, 1),
-		Vector2i(8, 8): Vector2i(1, 1),
-		Vector2i(0, 0): Vector2i(-1, -1),
-		Vector2i(8, 0): Vector2i(1, -1),
-		Vector2i(0, 8): Vector2i(-1, 1),
-		Vector2i(8, 5): Vector2i(1, 0),
-		Vector2i(7, 6): Vector2i(1, 1),
-	}
-	for cell: Vector2i in expected:
-		var cursor := Vector2(cell) + Vector2(0.5, 0.5)
-		_check(Rules.flame_direction(origin, cursor) == expected[cell], "flame direction toward %s" % cell)
-	_check(Rules.flame_direction(origin, Vector2(4.7, 4.2)) == Vector2i.ZERO, "flame direction: none on own cell")
+	_check(Rules.perform(state, Rules.Action.MACHINE_GUN, Vector2i(5, 5), Vector2(5.5, 5.5)) == Rules.INVALID, "machine gun: no ammo is invalid")
+	_check(state.get_count(Vector2i(5, 5)) == 2, "machine gun: no ammo leaves trifids")
 
 
 func _test_flamethrower() -> void:
 	var state := _state(Vector2i(4, 4))
-	_check(Rules.flame_cells(state, Vector2i(1, 0)).size() == 4, "flame: 4 cells")
-	_check(Rules.flame_cells(_state(Vector2i(7, 4)), Vector2i(1, 0)).size() == 1, "flame: clipped at edge")
-	state.set_count(Vector2i(5, 4), 3)
-	state.set_count(Vector2i(8, 4), 9)
-	state.set_count(Vector2i(5, 5), 2)
-	var killed := Rules.perform(state, Rules.Action.FLAMETHROWER, Vector2i(8, 4), Vector2(8.5, 4.5))
-	_check(killed == 12, "flame: kills everything in line")
-	_check(state.get_count(Vector2i(5, 5)) == 2, "flame: other cells untouched")
+	var right := Rules.flame_cells(state, Vector2(8.5, 4.5))
+	for x in range(5, 9):
+		_check(right.has(Vector2i(x, 4)), "flame right: hits (%d,4)" % x)
+	_check(right.has(Vector2i(6, 5)), "flame right: sector widens")
+	_check(not right.has(Vector2i(5, 5)), "flame right: (5,5) is outside 15°")
+	_check(not right.has(Vector2i(5, 6)), "flame right: (5,6) is outside")
+	_check(not right.has(state.player), "flame: own cell never hit")
+
+	var diagonal := Rules.flame_cells(state, Vector2(8.5, 8.5))
+	_check(diagonal.has(Vector2i(5, 5)) and diagonal.has(Vector2i(6, 6)) and diagonal.has(Vector2i(7, 7)), "flame diagonal: hits the diagonal")
+	_check(not diagonal.has(Vector2i(8, 8)), "flame diagonal: beyond radius 4")
+
+	var between := Rules.flame_cells(state, Rules.fighter_center(state) + Vector2.from_angle(deg_to_rad(22.5)) * 3.0)
+	_check(between.has(Vector2i(5, 4)), "flame between directions: no gap next to the fighter")
+
+	var edge := _state(Vector2i(0, 4))
+	var far := Rules.flame_cells(edge, Vector2(8.5, 4.5))
+	_check(far.has(Vector2i(4, 4)) and not far.has(Vector2i(5, 4)), "flame: radius 4")
+	_check(Rules.flame_cells(state, Vector2(4.7, 4.2)).is_empty(), "flame: no aim on own cell")
+
+	state.set_count(Vector2i(6, 4), 5)
+	state.set_count(Vector2i(6, 5), 2)
+	state.set_count(Vector2i(5, 6), 4)
+	_check(Rules.perform(state, Rules.Action.FLAMETHROWER, Vector2i(8, 4), Vector2(8.5, 4.5)) == 7, "flame: kills everything in the sector")
+	_check(state.get_count(Vector2i(5, 6)) == 4, "flame: outside the sector untouched")
 	_check(state.get_ammo(GameState.AMMO_FLAMETHROWER) == 1, "flame: ammo decreased")
-	var edge := _state(Vector2i(8, 4))
-	_check(Rules.perform(edge, Rules.Action.FLAMETHROWER, Vector2i(8, 4), Vector2(8.9, 4.5)) == Rules.INVALID, "flame: own cell is invalid")
-	_check(edge.get_ammo(GameState.AMMO_FLAMETHROWER) == 2, "flame: invalid use keeps ammo")
+	_check(Rules.perform(state, Rules.Action.FLAMETHROWER, Vector2i(4, 4), Vector2(4.5, 4.5)) == Rules.INVALID, "flame: own cell is invalid")
+	_check(state.get_ammo(GameState.AMMO_FLAMETHROWER) == 1, "flame: invalid use keeps ammo")
 
 
 func _test_grenade() -> void:

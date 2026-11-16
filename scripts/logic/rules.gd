@@ -12,7 +12,12 @@ const ACTIONS: Array[int] = [
 ## Weapon ranges in cells, measured between cell centers.
 const PISTOL_RANGE := 5
 const RANGE := 4
-const FLAME_LENGTH := 4
+## Machine gun line: number of steps along the main axis.
+const MACHINE_GUN_LENGTH := 4
+## Flamethrower sector: full angle in degrees, radius in cells, samples per cell side.
+const FLAME_ANGLE := 30.0
+const FLAME_RADIUS := 4.0
+const FLAME_SAMPLES := 6
 const NEIGHBOR_OFFSETS: Array[Vector2i] = [
 	Vector2i(-1, -1), Vector2i(0, -1), Vector2i(1, -1),
 	Vector2i(-1, 0), Vector2i(1, 0),
@@ -48,7 +53,7 @@ static func neighbors(cell: Vector2i) -> Array[Vector2i]:
 	return result
 
 
-## Range of the action in cells (pistol 5, machine gun and grenade 4).
+## Range of the action in cells (pistol 5, grenade 4).
 static func weapon_range(action: int) -> int:
 	return PISTOL_RANGE if action == Action.PISTOL else RANGE
 
@@ -75,36 +80,70 @@ static func move_targets(state: GameState) -> Array[Vector2i]:
 	return result
 
 
-## Cells in range of the weapon that contain trifids (valid pistol and machine gun targets).
-static func shoot_targets(state: GameState, action: int) -> Array[Vector2i]:
+## Cells within pistol range that contain trifids (valid pistol targets).
+static func pistol_targets(state: GameState) -> Array[Vector2i]:
 	var result: Array[Vector2i] = []
-	for cell in range_cells(state, weapon_range(action)):
+	for cell in range_cells(state, PISTOL_RANGE):
 		if state.get_count(cell) > 0:
 			result.append(cell)
 	return result
 
 
-## One of 8 directions from the fighter toward the cursor (angle rounded to 45°).
-## `cursor` is in cell units (1.0 = one cell). Returns ZERO when the cursor is
-## on the fighter's own cell.
-static func flame_direction(origin: Vector2i, cursor: Vector2) -> Vector2i:
-	if Vector2i(cursor.floor()) == origin:
-		return Vector2i.ZERO
-	var offset := cursor - (Vector2(origin) + Vector2(0.5, 0.5))
-	var angle := roundi(offset.angle() / (PI / 4.0)) * (PI / 4.0)
-	return Vector2i(roundi(cos(angle)), roundi(sin(angle)))
+## Center of the fighter's cell in cell units (1.0 = one cell).
+static func fighter_center(state: GameState) -> Vector2:
+	return Vector2(state.player) + Vector2(0.5, 0.5)
 
 
-static func flame_cells(state: GameState, direction: Vector2i) -> Array[Vector2i]:
+## Aiming vector from the fighter's center to the cursor (cell units).
+## ZERO when the cursor is on the fighter's own cell (= no aim).
+static func aim_vector(state: GameState, cursor: Vector2) -> Vector2:
+	if Vector2i(cursor.floor()) == state.player:
+		return Vector2.ZERO
+	return cursor - fighter_center(state)
+
+
+## Machine gun line toward the cursor: the ray from the fighter's center is stepped
+## one cell at a time along its main axis; each step hits the cell the ray is in.
+static func machine_gun_cells(state: GameState, cursor: Vector2) -> Array[Vector2i]:
 	var result: Array[Vector2i] = []
-	if direction == Vector2i.ZERO:
+	var aim := aim_vector(state, cursor)
+	if aim == Vector2.ZERO:
 		return result
-	for step in range(1, FLAME_LENGTH + 1):
-		var cell := state.player + direction * step
+	var step := aim / maxf(absf(aim.x), absf(aim.y))
+	var center := fighter_center(state)
+	for i in range(1, MACHINE_GUN_LENGTH + 1):
+		var cell := Vector2i((center + step * i).floor())
 		if not GameState.in_bounds(cell):
 			break
 		result.append(cell)
 	return result
+
+
+## Flamethrower sector toward the cursor: FLAME_ANGLE wide, FLAME_RADIUS long.
+## A cell is hit when at least one of its sample points lies inside the sector.
+static func flame_cells(state: GameState, cursor: Vector2) -> Array[Vector2i]:
+	var result: Array[Vector2i] = []
+	var aim := aim_vector(state, cursor)
+	if aim == Vector2.ZERO:
+		return result
+	var center := fighter_center(state)
+	for cell in GameState.all_cells():
+		if cell != state.player and _cell_in_sector(cell, center, aim.angle()):
+			result.append(cell)
+	return result
+
+
+static func _cell_in_sector(cell: Vector2i, center: Vector2, axis: float) -> bool:
+	var half_angle := deg_to_rad(FLAME_ANGLE / 2.0)
+	for sy in FLAME_SAMPLES:
+		for sx in FLAME_SAMPLES:
+			var point := Vector2(cell) + Vector2(sx + 0.5, sy + 0.5) / FLAME_SAMPLES
+			var offset := point - center
+			if offset.length() > FLAME_RADIUS:
+				continue
+			if absf(angle_difference(axis, offset.angle())) <= half_angle:
+				return true
+	return false
 
 
 ## 3×3 area around `center`, clipped to the board. Empty if the center is out of range.
@@ -121,18 +160,21 @@ static func grenade_cells(state: GameState, center: Vector2i) -> Array[Vector2i]
 
 
 ## Cells the action would affect when clicked at `cell` / `cursor` (cursor in cell
-## units, used by the flamethrower). Empty array = the click is not a valid action.
+## units, used for aiming the machine gun and the flamethrower).
+## Empty array = the click is not a valid action.
 static func target_cells(state: GameState, action: int, cell: Vector2i, cursor: Vector2) -> Array[Vector2i]:
 	var result: Array[Vector2i] = []
 	match action:
 		Action.MOVE:
 			if move_targets(state).has(cell):
 				result.append(cell)
-		Action.PISTOL, Action.MACHINE_GUN:
-			if shoot_targets(state, action).has(cell):
+		Action.PISTOL:
+			if pistol_targets(state).has(cell):
 				result.append(cell)
+		Action.MACHINE_GUN:
+			result = machine_gun_cells(state, cursor)
 		Action.FLAMETHROWER:
-			result = flame_cells(state, flame_direction(state.player, cursor))
+			result = flame_cells(state, cursor)
 		Action.GRENADE:
 			result = grenade_cells(state, cell)
 	return result
@@ -150,9 +192,6 @@ static func perform(state: GameState, action: int, cell: Vector2i, cursor: Vecto
 	match action:
 		Action.MOVE:
 			state.player = cell
-		Action.PISTOL:
-			state.set_count(cell, state.get_count(cell) - 1)
-			killed = 1
 		_:
 			for target in cells:
 				killed += state.get_count(target)
